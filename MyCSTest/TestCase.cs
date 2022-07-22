@@ -13,10 +13,18 @@ namespace MyCSTest
         {
             Name = name;
         }
+
+        public virtual void SetUp() { }
         public void run()
         {
-            var method = this.GetType().GetMethod(Name);
+            SetUp();
+            var method = GetType().GetMethod(Name);
+            if (method == null) throw new Exception();
             method.Invoke(this,null);
+            TearDown();
+        }
+
+        public virtual void TearDown() { 
         }
     }
 }

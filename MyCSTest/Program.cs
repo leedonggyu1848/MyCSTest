@@ -5,37 +5,58 @@ namespace MyCSTest
     {
         static void Main(string[] args)
         {
-            new TestCaseTest("testRunning").run();
+            new TestCaseTest("TestTemplateMethod").run();
         }
     }
 
     class TestCaseTest : TestCase
     {
         public TestCaseTest(string name) : base(name) { }
-        public void testRunning()
+        public RunTester Test { get; set; }
+
+        public override void SetUp()
         {
-             var test = new WasRun("testMethod");
-            Assert.True(test.RunCount == 0);
-            test.run();
-            Assert.True(test.RunCount == 1);
+            Test = new RunTester("TestMethod");
         }
+
+        public void TestTemplateMethod()
+        {
+            Test.run();
+            Assert.True("SetUp TestMethod TearDown " == Test.Log);
+        }
+            
+
     }
 
 
-    class WasRun:TestCase
+    class RunTester:TestCase
     {
-        public int RunCount { get; set; }
-        public WasRun(string name):base(name)
+        public bool WasRun { get; set; }
+        public bool WasSetUp { get; set; }
+        public string Log { get; set; }
+        public RunTester(string name):base(name)
         {
-            RunCount = default;
+            WasRun = default;
+            WasSetUp = default;
+            Log = "";
         }
 
-        public void testMethod()
+        public void TestMethod()
         {
-            RunCount = 1;
+            WasRun = true;
+            Log += "TestMethod ";
         }
 
-        
+        public override void SetUp() 
+        {
+            WasRun = false;
+            WasSetUp = true;
+            Log = "SetUp ";
+        }
 
+        public override void TearDown()
+        {
+            Log += "TearDown ";
+        }
     }
 }
