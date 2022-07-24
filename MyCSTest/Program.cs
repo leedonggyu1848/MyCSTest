@@ -5,7 +5,13 @@ namespace MyCSTest
     {
         static void Main(string[] args)
         {
-            new TestCaseTest("TestTemplateMethod").run();
+            Console.WriteLine("Main Test");
+            Type testType = typeof(TestCaseTest);
+            var suite = new TestSuite();
+            foreach(var testCase in testType.GetMethods())
+                if (testCase.Name.StartsWith("Test"))
+                    suite.Add(new TestCaseTest(testCase.Name));
+            Console.WriteLine(suite.Run().Summary());
         }
     }
 
@@ -14,17 +20,35 @@ namespace MyCSTest
         public TestCaseTest(string name) : base(name) { }
         public RunTester Test { get; set; }
 
-        public override void SetUp()
-        {
-            Test = new RunTester("TestMethod");
-        }
-
         public void TestTemplateMethod()
         {
-            Test.run();
-            Assert.True("SetUp TestMethod TearDown " == Test.Log);
+            Test = new RunTester("TestMethod");
+            Test.Run();
+            Assert.Equal("SetUp TestMethod TearDown ", Test.Log);
         }
-            
+
+        public void TestResult()
+        {
+            Test = new RunTester("TestMethod");
+            TestResult result = Test.Run();
+            Assert.Equal("1 run, 0 failed", result.Summary());
+        }
+
+        public void TestFailedResult()
+        {
+            Test = new RunTester("TestBrokenMethod");
+            TestResult result = Test.Run();
+            Assert.Equal("1 run, 1 filed", result.Summary());
+        }
+
+        public void TestClassSuite()
+        {
+            var testSuite = new TestSuite();
+            testSuite.Add(new RunTester("TestMethod"));
+            testSuite.Add(new RunTester("TestBrokenMethod"));
+            var result = testSuite.Run();
+            Assert.Equal("2 run, 1 filed", result.Summary());
+        }
 
     }
 
@@ -52,6 +76,10 @@ namespace MyCSTest
             WasRun = false;
             WasSetUp = true;
             Log = "SetUp ";
+        }
+        public void TestBrokenMethod()
+        {
+            throw new Exception();
         }
 
         public override void TearDown()

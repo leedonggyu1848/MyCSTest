@@ -15,13 +15,28 @@ namespace MyCSTest
         }
 
         public virtual void SetUp() { }
-        public void run()
+        public TestResult Run(TestResult result)
         {
+            result.Teststarted();
             SetUp();
             var method = GetType().GetMethod(Name);
-            if (method == null) throw new Exception();
-            method.Invoke(this,null);
+            try
+            {
+                if (method == null) throw new Exception();
+                method.Invoke(this, null);
+            }
+            catch
+            {
+                result.TestFailed();
+            }
             TearDown();
+            return result;
+        }
+
+        public TestResult Run()
+        {
+            TestResult result = new TestResult();
+            return Run(result);
         }
 
         public virtual void TearDown() { 
